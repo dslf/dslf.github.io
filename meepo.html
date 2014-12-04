@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Meepo Poof Train</title>
+	<style>
+		.selected { border: 3px solid green; }
+		.poofed { background: green; }
+	</style>
+</head>
+<body>
+	<h3>Press start and then start poofing! (f -&gt; click(in green box) -&gt; tab), timer will start from the first poof</h3>
+<ul>
+    <li id="meepo0">Meepo #1</li>
+    <li id="meepo1">Meepo #2</li>
+    <li id="meepo2">Meepo #3</li>
+    <li id="meepo3">Meepo #4</li>
+    <li id="meepo4">Meepo #5</li>
+</ul><br />
+<div id="clickArea" style="width: 250px; height: 250px; background: lime;"></div>
+<button type="button" id="start">Start</button>
+<ul id="times">
+</ul>
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script>
+	var started = false;
+
+var meepos = {
+    0: false,
+    1: false,
+    2: false,
+    3: false,
+    4: false
+};
+var wActive = false;
+var currentMeepo = 0;
+var renderMeepos = function() {
+    for (var i = 0; i != 5; ++i) {
+        if (i == currentMeepo) {
+            $('#meepo'+i).addClass('selected');
+        } else {
+            $('#meepo'+i).removeClass('selected');
+        }
+        if (meepos[i]) {
+            $('#meepo'+i).addClass('poofed');
+        } else {
+            $('#meepo'+i).removeClass('poofed');
+        }
+    }
+};
+
+var nextMeepo = function() {
+    ++currentMeepo;
+    if (currentMeepo > 4) {
+        currentMeepo = 0;
+    }
+    renderMeepos();
+};
+renderMeepos();
+
+$(function() {
+    var startTime;
+    var meepoCheck = function() {
+        var allPoofed = true;
+        for (var i in meepos) {
+            if (!meepos[i]) {
+                allPoofed = false;
+                break;
+            }
+        }
+        if (allPoofed) {
+            var totalTime = new Date().getTime() - startTime;
+            $('#times').prepend('<li>'+totalTime + 'ms</li>');
+            started = false;
+            meepos = {
+                0: false,
+                1: false,
+                2: false,
+                3: false,
+                4: false
+            };
+        }
+    };
+    
+    $(document).keydown(function(e) {
+        if (e.keyCode == 9 || e.keyCode == 70) {
+            e.preventDefault();
+            if (started) {
+                if (e.keyCode == 9) {
+                    nextMeepo();
+                    renderMeepos();
+                    wActive = false;
+                }
+                if (e.keyCode == 70) {
+                    renderMeepos();
+                    wActive = true;
+                }
+            }
+        }
+    });
+    $('#clickArea').mousedown(function(e) {
+        e.preventDefault();
+        if (started) {
+            if (wActive) {
+                var nonepoofed = true;
+                for (var i in meepos) {
+                    if (meepos[i]) {
+                        nonepoofed = false;
+                    }
+                }
+                if (nonepoofed) {
+                    startTime = new Date().getTime();                    
+                }
+                
+                meepos[currentMeepo] = true;
+                wActive = false;
+                renderMeepos();
+                meepoCheck();
+            }
+        }
+    });
+    
+    $('#start').click(function() {
+        currentMeepo = 0;
+        meepos = {
+            0: false,
+            1: false,
+            2: false,
+            3: false,
+            4: false
+        };
+        renderMeepos();
+        started = true;
+    });
+});
+
+</script>
+
+</body>
+</html>
